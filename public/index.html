@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QueryLens</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="logo">◉</span> QueryLens <small>PostgreSQL query visualizer · library DB</small></div>
+    <nav>
+      <button class="tab active" data-view="console">SQL Console</button>
+      <button class="tab" data-view="lab">Index Lab</button>
+      <button class="tab" data-view="schema">Schema</button>
+      <button class="tab" data-view="history">History</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- SQL CONSOLE -->
+    <section id="view-console" class="view active">
+      <div class="editor-bar">
+        <select id="samples"><option value="">Sample queries…</option></select>
+        <span class="spacer"></span>
+        <span class="muted">Ctrl+Enter to run</span>
+        <button id="run" class="primary">▶ Run</button>
+      </div>
+      <textarea id="sql" spellcheck="false">SELECT c.name AS category, count(*) AS loans
+FROM loans l
+JOIN books b ON b.book_id = l.book_id
+JOIN categories c ON c.category_id = b.category_id
+GROUP BY c.name
+ORDER BY loans DESC;</textarea>
+
+      <div id="stats" class="stats"></div>
+      <div id="error" class="error hidden"></div>
+
+      <div class="subtabs">
+        <button class="subtab active" data-pane="plan">Plan tree</button>
+        <button class="subtab" data-pane="results">Results</button>
+        <button class="subtab" data-pane="chart">Chart</button>
+        <button class="subtab" data-pane="raw">Raw plan</button>
+      </div>
+      <div class="pane active" id="pane-plan">
+        <div class="plan-layout">
+          <div id="plan-tree" class="plan-tree"><p class="muted center">Run a query to see its execution plan.</p></div>
+          <aside id="plan-detail" class="plan-detail"><p class="muted">Click a node to see its details.</p></aside>
+        </div>
+        <div class="legend">
+          <span><i style="background:var(--heat-0)"></i>cheap</span>
+          <span><i style="background:var(--heat-2)"></i></span>
+          <span><i style="background:var(--heat-4)"></i>expensive (share of own time)</span>
+          <span class="warn-chip">⚠ row estimate off by 10×+</span>
+        </div>
+      </div>
+      <div class="pane" id="pane-results"><div id="results"></div></div>
+      <div class="pane" id="pane-chart"><div id="chart"></div></div>
+      <div class="pane" id="pane-raw"><pre id="raw"></pre></div>
+    </section>
+
+    <!-- INDEX LAB -->
+    <section id="view-lab" class="view">
+      <p class="intro">Run a query, add an index, and run it again. Everything happens inside one transaction that is
+        rolled back, so the database is not changed.</p>
+      <div class="lab-inputs">
+        <label>Scenario <select id="lab-presets"></select></label>
+        <label>Query <textarea id="lab-sql" spellcheck="false"></textarea></label>
+        <label>Index to try <textarea id="lab-index" spellcheck="false" class="short"></textarea></label>
+        <div><button id="lab-run" class="primary">⇄ Compare</button></div>
+      </div>
+      <div id="lab-error" class="error hidden"></div>
+      <div id="lab-summary"></div>
+      <div class="lab-compare">
+        <div><h3>Without index</h3><div id="lab-before" class="plan-tree small"></div></div>
+        <div><h3>With index</h3><div id="lab-after" class="plan-tree small"></div></div>
+      </div>
+
+      <h2>Indexes in the database</h2>
+      <div class="index-form">
+        <select id="idx-table"></select>
+        <select id="idx-cols" multiple size="4"></select>
+        <button id="idx-create">+ Create index</button>
+        <span class="muted">Ctrl/Shift-click for multiple columns. Unlike the lab, this is permanent.</span>
+      </div>
+      <div id="index-list"></div>
+    </section>
+
+    <!-- SCHEMA -->
+    <section id="view-schema" class="view">
+      <div id="er"></div>
+      <h2>Other database objects</h2>
+      <div id="objects"></div>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="view-history" class="view">
+      <div class="editor-bar">
+        <span class="muted">Every query you run is stored in the <code>query_log</code> table.</span>
+        <span class="spacer"></span>
+        <button id="history-clear">Clear history</button>
+      </div>
+      <div id="history-chart"></div>
+      <div id="history-list"></div>
+    </section>
+  </main>
+
+  <div id="tooltip" class="tooltip hidden"></div>
+  <script src="/vendor/d3.min.js"></script>
+  <script src="plan.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

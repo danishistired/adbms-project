@@ -1,0 +1,17 @@
+{
+  "name": "querylens",
+  "version": "1.0.0",
+  "description": "PostgreSQL query visualizer on a library database (ADBMS project)",
+  "main": "server.js",
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "start": "node server.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "d3": "^7.9.0",
+    "dotenv": "^18.0.9",
+    "express": "^4.22.3",
+    "pg": "^8.23.1"
+  }
+}
